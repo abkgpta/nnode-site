@@ -44,6 +44,13 @@
   button { text-transform:uppercase; border:0; background:var(--black); color:var(--yellow); font:inherit; font-size:14px; padding:14px 18px; cursor:pointer; }
   button:hover { background:#000; }
   button:disabled { opacity:.6; cursor:default; }
+  .views { width:100%; display:grid; }
+  .view { grid-area:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; width:100%;
+          transition:opacity .35s ease, transform .35s ease; }
+  .view.hidden { opacity:0; transform:translateY(6px); pointer-events:none; visibility:hidden; transition:opacity .35s ease, transform .35s ease, visibility 0s .35s; }
+  .sub { font-size:14px; line-height:1.5; }
+  .again { background:none; color:var(--black); border:0; border-bottom:2px solid var(--black); padding:2px 0; font-size:13px; }
+  .again:hover { background:none; opacity:.6; }
   .hp { position:absolute; left:-9999px; }
   .msg { font-size:13px; min-height:1.2em; margin-top:-8px; }
   .sound { position:fixed; right:20px; bottom:20px; background:var(--yellow); color:var(--black); border:2px solid var(--black);
@@ -90,13 +97,22 @@
 <path fill-rule="nonzero" fill="rgb(15.686035%, 15.686035%, 15.686035%)" fill-opacity="1" d="M 1284.003906 259.039062 L 1284.003906 258.039062 L 1283.003906 258.039062 L 1283.003906 259.039062 Z M 1787.53125 259.039062 L 1788.53125 259.039062 L 1788.53125 258.039062 L 1787.53125 258.039062 Z M 1787.53125 843.976562 L 1787.53125 844.976562 L 1788.53125 844.976562 L 1788.53125 843.976562 Z M 1284.003906 843.976562 L 1283.003906 843.976562 L 1283.003906 844.976562 L 1284.003906 844.976562 Z M 1284.003906 259.039062 L 1284.003906 260.039062 L 1787.53125 260.039062 L 1787.53125 258.039062 L 1284.003906 258.039062 Z M 1787.53125 259.039062 L 1786.53125 259.039062 L 1786.53125 843.976562 L 1788.53125 843.976562 L 1788.53125 259.039062 Z M 1787.53125 843.976562 L 1787.53125 842.976562 L 1284.003906 842.976562 L 1284.003906 844.976562 L 1787.53125 844.976562 Z M 1284.003906 843.976562 L 1285.003906 843.976562 L 1285.003906 259.039062 L 1283.003906 259.039062 L 1283.003906 843.976562 Z M 1284.003906 843.976562 "/>
 </g>
 </svg>
-    <h1>Coming soon</h1>
-    <form name="waitlist" id="waitlist">
-      <p class="hp"><label>Leave empty <input name="company"></label></p>
-      <input type="email" name="email" placeholder="Your email" required aria-label="Email address">
-      <button type="submit">Notify me</button>
-    </form>
-    <p class="msg" id="msg" role="status"></p>
+    <div class="views">
+      <div class="view" id="v-form">
+        <h1>Coming soon</h1>
+        <form name="waitlist" id="waitlist">
+          <p class="hp"><label>Leave empty <input name="company"></label></p>
+          <input type="email" name="email" placeholder="Your email" required aria-label="Email address">
+          <button type="submit">Notify me</button>
+        </form>
+        <p class="msg" id="msg" role="status"></p>
+      </div>
+      <div class="view hidden" id="v-done" aria-live="polite">
+        <h1>You're on the list.</h1>
+        <p class="sub">We'll tell you the moment STICK drops.</p>
+        <button type="button" class="again" id="again">Add another email</button>
+      </div>
+    </div>
     <span class="tag">/STICK THROUGH IT ALL/</span>
   </div>
 </div>
@@ -104,15 +120,20 @@
 <script>
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhTaXVS1MVEQcTLNeYxokAJucj6C6iQenMjRiwTEqehgd6xSvN9SyTxvfObrK7fO5g/exec';
   const f = document.getElementById('waitlist'), m = document.getElementById('msg');
+  const vForm = document.getElementById('v-form'), vDone = document.getElementById('v-done');
+  const show = (on, off) => { off.classList.add('hidden'); on.classList.remove('hidden'); };
   f.addEventListener('submit', async e => {
     e.preventDefault();
     if (f.company.value) return;
-    const btn = f.querySelector('button'); btn.disabled = true;
+    const btn = f.querySelector('button'); btn.disabled = true; m.textContent = '';
     try {
       await fetch(SHEET_URL, { method:'POST', mode:'no-cors', body:new URLSearchParams({ email:f.email.value }) });
-      f.reset(); m.textContent = "You're on the list.";
+      f.reset(); show(vDone, vForm);
     } catch { m.textContent = 'Something went wrong. Try again.'; }
     btn.disabled = false;
+  });
+  document.getElementById('again').addEventListener('click', () => {
+    show(vForm, vDone); f.email.focus({ preventScroll:true });
   });
   const v = document.getElementById('vid'), b = document.getElementById('snd');
   b.addEventListener('click', () => {
