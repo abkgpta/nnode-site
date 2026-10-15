@@ -12,35 +12,35 @@
   :root { --yellow:#FFFB24; --black:#282828; --white:#F8F8F8; }
   * { box-sizing:border-box; margin:0; }
   html,body { height:100%; }
-  body { background:var(--yellow); color:var(--black); font-family:"Azeret Mono",ui-monospace,monospace;
-         font-weight:500; text-transform:uppercase; display:flex; flex-direction:column; min-height:100vh; padding:24px; }
-  main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px; padding:16px 0; }
-  .copy { display:flex; flex-direction:column; align-items:center; text-align:center; gap:32px; }
-  .video { width:min(760px,100%); aspect-ratio:16/9; object-fit:cover; display:block; border:2px solid var(--black); background:#ddd; }
-  @media (max-width:760px) {
-    main { gap:32px; padding-top:8px; }
-    .copy { gap:24px; }
-    footer { margin-top:32px; }
-  }
-  .logo { width:min(320px,70vw); height:auto; }
-  .tag { background:var(--black); color:var(--yellow); padding:6px 12px; font-size:14px; letter-spacing:.04em; }
-  h1 { font-size:clamp(28px,6vw,48px); font-weight:500; letter-spacing:.02em; }
-  form { display:flex; width:min(440px,100%); border:2px solid var(--black); }
+  body { background:var(--black); color:var(--black); font-family:"Azeret Mono",ui-monospace,monospace;
+         font-weight:500; text-transform:uppercase; overflow:hidden; }
+  .video { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; background:var(--black); }
+  .overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .panel { background:var(--yellow); border:2px solid var(--black); padding:32px; width:min(480px,100%);
+           display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
+  .logo { width:min(280px,70%); height:auto; }
+  .tag { background:var(--black); color:var(--yellow); padding:6px 12px; font-size:13px; letter-spacing:.04em; }
+  h1 { font-size:clamp(26px,5vw,40px); font-weight:500; letter-spacing:.02em; }
+  form { display:flex; width:100%; border:2px solid var(--black); }
   input[type=email] { flex:1; min-width:0; border:0; background:var(--white); color:var(--black); padding:14px;
          font:inherit; font-size:14px; text-transform:none; }
   input[type=email]::placeholder { text-transform:uppercase; color:#28282899; }
   button { text-transform:uppercase; border:0; background:var(--black); color:var(--yellow); font:inherit; font-size:14px; padding:14px 18px; cursor:pointer; }
   button:hover { background:#000; }
+  button:disabled { opacity:.6; cursor:default; }
   .hp { position:absolute; left:-9999px; }
-  .msg { font-size:13px; min-height:1.2em; }
-  footer { text-align:center; font-size:12px; font-weight:400; }
+  .msg { font-size:13px; min-height:1.2em; margin-top:-8px; }
+  .sound { position:fixed; right:20px; bottom:20px; background:var(--yellow); color:var(--black); border:2px solid var(--black);
+           font-size:13px; padding:10px 14px; letter-spacing:.04em; }
+  .sound:hover { background:var(--white); }
+  @media (max-width:600px) { .panel { padding:24px 20px; gap:20px; } }
 </style>
 </head>
 <body>
-<main>
-  <video class="video" src="brand.mp4" poster="brand_poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="nNode brand film preview: Welcome to the mesh"></video>
-  <div class="copy">
-  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="logo" role="img" aria-label="nNode" viewBox="777 517 365 68">
+<video class="video" id="vid" src="brand.mp4" poster="brand_poster.jpg" autoplay muted loop playsinline preload="auto" aria-label="nNode brand film"></video>
+<div class="overlay">
+  <div class="panel">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="logo" role="img" aria-label="nNode" viewBox="777 517 365 68">
 <defs>
 <clipPath id="clip-0">
 <path clip-rule="nonzero" d="M 132.46875 259.039062 L 635.996094 259.039062 L 635.996094 843.976562 L 132.46875 843.976562 Z M 132.46875 259.039062 "/>
@@ -74,19 +74,18 @@
 <path fill-rule="nonzero" fill="rgb(15.686035%, 15.686035%, 15.686035%)" fill-opacity="1" d="M 1284.003906 259.039062 L 1284.003906 258.039062 L 1283.003906 258.039062 L 1283.003906 259.039062 Z M 1787.53125 259.039062 L 1788.53125 259.039062 L 1788.53125 258.039062 L 1787.53125 258.039062 Z M 1787.53125 843.976562 L 1787.53125 844.976562 L 1788.53125 844.976562 L 1788.53125 843.976562 Z M 1284.003906 843.976562 L 1283.003906 843.976562 L 1283.003906 844.976562 L 1284.003906 844.976562 Z M 1284.003906 259.039062 L 1284.003906 260.039062 L 1787.53125 260.039062 L 1787.53125 258.039062 L 1284.003906 258.039062 Z M 1787.53125 259.039062 L 1786.53125 259.039062 L 1786.53125 843.976562 L 1788.53125 843.976562 L 1788.53125 259.039062 Z M 1787.53125 843.976562 L 1787.53125 842.976562 L 1284.003906 842.976562 L 1284.003906 844.976562 L 1787.53125 844.976562 Z M 1284.003906 843.976562 L 1285.003906 843.976562 L 1285.003906 259.039062 L 1283.003906 259.039062 L 1283.003906 843.976562 Z M 1284.003906 843.976562 "/>
 </g>
 </svg>
-  <h1>Coming soon</h1>
-  <form name="waitlist" id="waitlist">
-    <p class="hp"><label>Leave empty <input name="company"></label></p>
-    <input type="email" name="email" placeholder="Your email" required aria-label="Email address">
-    <button type="submit">Notify me</button>
-  </form>
-  <p class="msg" id="msg" role="status"></p>
-  <span class="tag">/STICK THROUGH IT ALL/</span>
+    <h1>Coming soon</h1>
+    <form name="waitlist" id="waitlist">
+      <p class="hp"><label>Leave empty <input name="company"></label></p>
+      <input type="email" name="email" placeholder="Your email" required aria-label="Email address">
+      <button type="submit">Notify me</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+    <span class="tag">/STICK THROUGH IT ALL/</span>
   </div>
-</main>
-<footer>&copy; 2026 <span style="text-transform:none">nNode</span></footer>
+</div>
+<button class="sound" id="snd" type="button" aria-pressed="false">Sound off</button>
 <script>
-  // Paste your Google Apps Script web app URL here (see SETUP.md).
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhTaXVS1MVEQcTLNeYxokAJucj6C6iQenMjRiwTEqehgd6xSvN9SyTxvfObrK7fO5g/exec';
   const f = document.getElementById('waitlist'), m = document.getElementById('msg');
   f.addEventListener('submit', async e => {
@@ -98,6 +97,13 @@
       f.reset(); m.textContent = "You're on the list.";
     } catch { m.textContent = 'Something went wrong. Try again.'; }
     btn.disabled = false;
+  });
+  const v = document.getElementById('vid'), b = document.getElementById('snd');
+  b.addEventListener('click', () => {
+    v.muted = !v.muted;
+    if (!v.muted) v.play().catch(() => {});
+    b.textContent = v.muted ? 'Sound off' : 'Sound on';
+    b.setAttribute('aria-pressed', String(!v.muted));
   });
 </script>
 </body>
