@@ -28,11 +28,24 @@
 :root{--y:#FFFB24;--k:#282828;--w:#F8F8F8;--g:#9a9a92;--yellow:#FFFB24;--black:#282828;--white:#F8F8F8;
   --mono:"Azeret Mono",ui-monospace,Menlo,Consolas,monospace;--bar:64px}
 *{box-sizing:border-box;margin:0}
-html{scroll-snap-type:y proximity;background:var(--k)}
-body{background:var(--k);color:var(--w);font-family:var(--mono);font-weight:500;-webkit-text-size-adjust:100%}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--k)}
+body{color:var(--w);font-family:var(--mono);font-weight:500;-webkit-text-size-adjust:100%}
+#track{display:flex;height:100vh;height:100svh;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
+.pan{flex:0 0 100vw;width:100vw;height:100vh;height:100svh;position:relative;overflow:hidden}
+/* on-screen arrows */
+#nav{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:8px;align-items:center;color:var(--w);transition:bottom .35s ease}
+body.withbar #nav{bottom:calc(var(--bar) + 14px + env(safe-area-inset-bottom))}
+body[data-tone=white] #nav{color:var(--k);--nb:var(--w)}body[data-tone=yellow] #nav{color:var(--k);--nb:var(--y)}
+#nav button{font:500 14px/1 var(--mono);letter-spacing:.1em;background:var(--nb,var(--k));border:1.5px solid currentColor;color:inherit;width:44px;height:44px;cursor:pointer;display:grid;place-items:center}
+#nav button:disabled{opacity:.3;cursor:default}
+@media (hover:hover){#nav button:not(:disabled):hover{background:var(--y);color:var(--k);border-color:var(--y)}}
+#ndots{display:flex;gap:6px;margin:0 4px}
+#ndots i{width:10px;height:10px;border:1.5px solid currentColor;display:block;cursor:pointer}
+#ndots i.on{background:currentColor}
+@media (max-width:600px){#ndots{display:none}}
 
 /* ---------- hero: the coming-soon page, unchanged in look ---------- */
-.hero{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--black);color:var(--black);text-transform:uppercase;scroll-snap-align:start}
+.hero{position:relative;overflow:hidden;background:var(--black);color:var(--black);text-transform:uppercase}
 .hero .video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--black)}
 .hero .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px}
 .hero .panel{background:var(--yellow);border:2px solid var(--black);padding:32px;width:min(480px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px}
@@ -51,14 +64,16 @@ body{background:var(--k);color:var(--w);font-family:var(--mono);font-weight:500;
 .hero .again{background:none;color:var(--black);border:0;border-bottom:2px solid var(--black);padding:2px 0;font:inherit;font-size:13px;cursor:pointer;text-transform:uppercase}
 .hp{position:absolute;left:-9999px}
 .msg{font-size:13px;min-height:1.2em;margin-top:-8px}
-.hero .sound{position:absolute;right:20px;bottom:20px;background:var(--yellow);color:var(--black);border:2px solid var(--black);font:inherit;font-size:13px;padding:10px 14px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase}
+.hero .sound{position:absolute;right:20px;top:20px;background:var(--yellow);color:var(--black);border:2px solid var(--black);font:inherit;font-size:13px;padding:10px 14px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase}
 .hero .sound:hover{background:var(--white)}
-.hero .down{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:var(--black);color:var(--yellow);border:2px solid var(--yellow);font-size:13px;letter-spacing:.08em;padding:10px 14px;text-decoration:none;text-transform:none;white-space:nowrap;display:flex;gap:10px;align-items:center}
-.hero .down b{display:inline-block;animation:nudge 1.4s ease-in-out infinite}
-@media (max-width:600px){.hero .panel{padding:24px 20px;gap:20px}.hero .sound{right:12px;bottom:76px}.hero .down{bottom:16px}}
+.hero .down{position:absolute;left:20px;bottom:20px;background:var(--black);color:var(--yellow);border:2px solid var(--yellow);font-size:13px;letter-spacing:.08em;padding:10px 14px;text-decoration:none;text-transform:none;white-space:nowrap;display:flex;gap:10px;align-items:center}
+.hero .down b{display:inline-block;animation:nudgex 1.4s ease-in-out infinite}
+@keyframes nudgex{50%{transform:translateX(4px)}}
+@media (max-width:600px){.hero .panel{padding:24px 20px;gap:20px}.hero .sound{right:16px;top:16px}.hero .down{left:16px;bottom:20px}}
 
 /* ---------- explainer: one scaled stage per screen ---------- */
-.slot{position:relative;height:100vh;height:100svh;padding:8px 8px calc(var(--bar) + 8px);scroll-snap-align:start}
+.slot{padding:8px 8px calc(var(--bar) + 72px)}
+@media (min-width:900px){.slot{padding-bottom:calc(var(--bar) + 8px)}}
 .slot.t-black{background:var(--k)}.slot.t-white{background:var(--w)}.slot.t-yellow{background:var(--y)}
 .frame{position:relative;width:100%;height:100%;overflow:hidden}
 .stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,.5));overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -109,10 +124,10 @@ html.port .chrome .tl{left:44px;top:34px}html.port .chrome .tr{right:44px;top:34
 html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 
 /* ---------- email bar that follows the explainer ---------- */
-#bar{position:fixed;left:0;right:0;bottom:0;z-index:50;min-height:var(--bar);background:var(--k);color:var(--w);border-top:2px solid var(--y);
+#bar{position:fixed;transform:translateY(110%);left:0;right:0;bottom:0;z-index:50;min-height:var(--bar);background:var(--k);color:var(--w);border-top:2px solid var(--y);
   display:flex;align-items:center;justify-content:center;gap:16px;padding:8px max(16px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
   transform:translateY(110%);transition:transform .35s ease}
-#bar.show{transform:none}
+body.withbar #bar{transform:none}
 #bar .lab{font-size:13px;letter-spacing:.1em;white-space:nowrap}
 #bar .lab span{color:var(--y)}
 #bar .wl{max-width:460px;border-color:var(--y)}
@@ -121,22 +136,24 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 #bar.joined .wl,#bar.joined .lab{display:none}#bar.joined .done{display:block}
 @media (max-width:720px){#bar .lab{display:none}#bar .wl{max-width:none}}
 
-/* ---------- ending: email to watch the film ---------- */
-.film{min-height:100vh;min-height:100svh;background:var(--y);color:var(--k);padding:clamp(56px,9vh,110px) 24px 40px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center}
-.film .in{width:min(960px,100%)}
-.film .k{opacity:.7;font-size:13px}
-.film h2{font-size:clamp(30px,5.4vw,56px);font-weight:500;line-height:1.05;letter-spacing:-.01em}
-.film p{font-size:clamp(14px,1.6vw,17px);line-height:1.6;letter-spacing:.04em;margin-top:16px;max-width:52ch}
-.film .wl{margin-top:26px;max-width:560px}
-.film .msg{margin-top:10px}
-.player{position:relative;margin-top:34px;width:100%;aspect-ratio:16/9;background:var(--k);border:2px solid var(--k);overflow:hidden}
-.player img,.player video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.player img{filter:grayscale(1) brightness(.45) blur(3px);transform:scale(1.04)}
-.player .lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--w);text-align:center;padding:16px}
-.player .lock span{background:var(--y);color:var(--k);padding:6px 12px;font-size:clamp(13px,1.6vw,16px);letter-spacing:.04em}
-.player .lock small{font-size:12px;letter-spacing:.12em;opacity:.8}
-.player video{display:none;object-fit:contain;background:#000}
-.player.open img,.player.open .lock{display:none}.player.open video{display:block}
+/* ---------- ending: join slide, then film slide ---------- */
+.end{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(56px,9vh,110px) 24px calc(96px + env(safe-area-inset-bottom))}
+.end .in{width:min(960px,100%)}
+.end .k{opacity:.7;font-size:13px;letter-spacing:.14em;margin-bottom:18px}
+.end h2{font-size:clamp(30px,5.4vw,64px);font-weight:500;line-height:1.05;letter-spacing:-.01em}
+.end p{font-size:clamp(14px,1.6vw,17px);line-height:1.6;letter-spacing:.04em;margin-top:16px;max-width:52ch}
+.join{background:var(--y);color:var(--k)}
+.join .wl{margin-top:28px;max-width:560px}
+.join .msg{margin-top:12px;min-height:1.4em}
+.join .ok{display:none;margin-top:28px;font-size:clamp(18px,2.4vw,26px)}
+.join .ok span{background:var(--k);color:var(--y);padding:4px 10px}
+.join.joined .wl{display:none}.join.joined .ok{display:block}
+.watch{background:var(--k);color:var(--w)}
+.watch .in{width:min(1100px,100%)}
+.player{position:relative;margin-top:22px;width:100%;max-height:62svh;aspect-ratio:16/9;background:#000;border:2px solid var(--y)}
+.player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:block}
+.end .foot{position:absolute;left:24px;right:24px;bottom:calc(24px + env(safe-area-inset-bottom));width:auto;margin:0;padding:0;padding-right:300px}
+@media (max-width:600px){.end .foot{padding-right:0;bottom:calc(76px + env(safe-area-inset-bottom))}.end{padding-bottom:150px}}
 .foot{width:min(960px,100%);margin-top:auto;padding-top:48px;display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:space-between;font-size:12px;letter-spacing:.12em}
 .foot button{font:inherit;letter-spacing:inherit;background:none;border:0;border-bottom:1.5px solid currentColor;color:inherit;padding:0 0 2px;cursor:pointer}
 
@@ -151,7 +168,8 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 <body>
 
 <!-- HERO: video + waitlist -->
-<header class="hero" id="top">
+<div id="track">
+<header class="pan hero" id="top" data-tone="yellow">
 <video class="video" id="vid" src="brand.mp4" poster="brand_poster.jpg" autoplay muted loop playsinline preload="auto" aria-label="nNode brand film"></video>
 <div class="overlay">
   <div class="panel">
@@ -208,13 +226,12 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
     <span class="tag">/STICK THROUGH IT ALL/</span>
   </div>
 </div>
-<a class="down" href="#explainer">WHAT IS nNode? <b>↓</b></a>
+<a class="down" href="#n1" data-go="1">WHAT IS nNode? <b>→</b></a>
 <button class="sound" id="snd" type="button" aria-pressed="false">Sound off</button>
 </header>
 
 <!-- WHAT IS nNode: the five interactive slides -->
-<main aria-label="What is nNode">
-<div class="slot t-white" id="explainer"><div class="frame"><div class="stage">
+<div class="pan slot t-white" id="n1" data-tone="white" data-bar="1" aria-label="/01/ THE KNOT/"><div class="frame"><div class="stage">
 <section class="slide t-white" data-t="white" data-sec="/01/ THE KNOT/">
   <div class="vis" id="v1"><svg id="s1" width="1600" height="900" viewBox="0 0 1600 900">
     <rect x="700" y="120" width="860" height="700" fill="transparent"/>
@@ -234,7 +251,7 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 <div class="chrome"><span class="tl">/nNode/ WE ARE ALL NODES/</span><span class="tr">/01/05/</span><span class="bl">/01/ THE KNOT/</span></div>
 </section>
 </div></div></div>
-<div class="slot t-black"><div class="frame"><div class="stage">
+<div class="pan slot t-black" id="n2" data-tone="black" data-bar="1" aria-label="/02/ NETWORK EFFECTS/"><div class="frame"><div class="stage">
 <section class="slide t-black" data-t="black" data-sec="/02/ NETWORK EFFECTS/">
   <div class="vis" id="v2">
     <svg id="s2" width="1600" height="900" viewBox="0 0 1600 900"><g id="s2lines"></g><g id="s2dots"></g><g id="s2chart"></g></svg>
@@ -255,7 +272,7 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 <div class="chrome"><span class="tl">/nNode/ WE ARE ALL NODES/</span><span class="tr">/02/05/</span><span class="bl">/02/ NETWORK EFFECTS/</span></div>
 </section>
 </div></div></div>
-<div class="slot t-yellow"><div class="frame"><div class="stage">
+<div class="pan slot t-yellow" id="n3" data-tone="yellow" data-bar="1" aria-label="/03/ THE MESH/"><div class="frame"><div class="stage">
 <section class="slide t-yellow" data-t="yellow" data-sec="/03/ THE MESH/">
   <svg id="s3" class="abs" style="left:0;top:0" width="1600" height="900" viewBox="0 0 1600 900"></svg>
   <div class="abs txt" style="left:110px;top:105px;width:900px;--pt:100px">
@@ -268,7 +285,7 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 <div class="chrome"><span class="tl">/nNode/ WE ARE ALL NODES/</span><span class="tr">/03/05/</span><span class="bl">/03/ THE MESH/</span></div>
 </section>
 </div></div></div>
-<div class="slot t-white"><div class="frame"><div class="stage">
+<div class="pan slot t-white" id="n4" data-tone="white" data-bar="1" aria-label="/04/ EVERYWHERE/"><div class="frame"><div class="stage">
 <section class="slide t-white" data-t="white" data-sec="/04/ EVERYWHERE/">
   <div class="vis" id="v4"><canvas id="s4" width="1600" height="900"></canvas></div>
   <div class="abs txt" style="left:110px;top:120px;width:480px;--pt:100px">
@@ -280,7 +297,7 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 <div class="chrome"><span class="tl">/nNode/ WE ARE ALL NODES/</span><span class="tr">/04/05/</span><span class="bl">/04/ EVERYWHERE/</span></div>
 </section>
 </div></div></div>
-<div class="slot t-black"><div class="frame"><div class="stage">
+<div class="pan slot t-black" id="n5" data-tone="black" data-bar="1" aria-label="/05/ YOU/"><div class="frame"><div class="stage">
 <section class="slide t-black" data-t="black" data-sec="/05/ YOU/">
   <div class="vis" id="v5"><svg id="s5" width="1600" height="900" viewBox="0 0 1600 900"></svg></div>
   <div class="abs txt" style="left:110px;top:130px;width:500px;--pt:100px">
@@ -300,28 +317,36 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 </section>
 </div></div></div>
 
-</main>
 
-<!-- ENDING: email to watch the film -->
-<section class="film" id="film">
+<!-- JOIN -->
+<section class="pan end join" id="join" data-tone="yellow" aria-label="Join the waitlist">
   <div class="in">
-    <div class="k">/06/ THE FILM/</div>
-    <h2>WELCOME TO THE MESH.<br>WATCH THE <span style="background:var(--k);color:var(--y);padding:0 .2em">nNode</span> FILM.</h2>
-    <p>ENTER YOUR EMAIL TO JOIN THE STICK WAITLIST AND WATCH THE FILM, WITH SOUND.</p>
-    <form class="wl" id="filmf" data-source="film">
+    <div class="k">/06/ JOIN THE MESH/</div>
+    <h2>YOU ARE A NODE.<br>PLUG INTO THE MESH.</h2>
+    <p>GET ON THE STICK WAITLIST. WE'LL TELL YOU THE MOMENT THE FIRST DROP GOES LIVE.</p>
+    <form class="wl" id="joinf" data-source="join">
       <p class="hp"><label>Leave empty <input name="company"></label></p>
       <input type="email" name="email" placeholder="YOUR EMAIL" required aria-label="Email address">
-      <button type="submit">WATCH THE FILM →</button>
+      <button type="submit">JOIN →</button>
     </form>
-    <p class="msg" id="filmmsg" role="status"></p>
-    <div class="player" id="player">
-      <img src="brand_poster.jpg" alt="">
-      <div class="lock"><span>/ENTER YOUR EMAIL TO WATCH/</span><small>YOU ARE A NODE. I AM A NODE. WE ARE ALL NODES.</small></div>
-      <video id="filmv" src="brand.mp4" poster="brand_poster.jpg" controls playsinline preload="none"></video>
-    </div>
+    <p class="msg" id="joinmsg" role="status"></p>
+    <div class="ok"><span>YOU'RE ON THE LIST.</span></div>
   </div>
   <div class="foot"><span>/STICK THROUGH IT ALL/</span><button type="button" class="srcb">SOURCES</button><span>nNode. 2026.</span></div>
 </section>
+
+<!-- FILM -->
+<section class="pan end watch" id="film" data-tone="black" aria-label="The film">
+  <div class="in">
+    <div class="k">/07/ THE FILM/</div>
+    <h2>WELCOME TO THE MESH.</h2>
+    <div class="player"><video id="filmv" src="brand.mp4" poster="brand_poster.jpg" controls playsinline preload="none"></video></div>
+  </div>
+  <div class="foot"><span>/STICK THROUGH IT ALL/</span><button type="button" class="srcb">SOURCES</button><span>nNode. 2026.</span></div>
+</section>
+</div>
+
+<nav id="nav" aria-label="Slides"><button id="pv" type="button" aria-label="Previous slide">←</button><span id="ndots"></span><button id="nx" type="button" aria-label="Next slide">→</button></nav>
 
 <!-- email bar shown while reading the explainer -->
 <div id="bar" aria-hidden="true">
@@ -346,9 +371,8 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhTaXVS1MVEQcTLNeYxokAJucj6C6iQenMjRiwTEqehgd6xSvN9SyTxvfObrK7fO5g/exec';
   const $=id=>document.getElementById(id);
   const isJoined=()=>{try{return localStorage.getItem('nnode_joined')==='1'}catch(e){return false}};
-  const setJoined=()=>{try{localStorage.setItem('nnode_joined','1')}catch(e){}$('bar').classList.add('joined');openFilm(false)};
+  const setJoined=()=>{try{localStorage.setItem('nnode_joined','1')}catch(e){}$('bar').classList.add('joined');$('join').classList.add('joined')};
   const send=(f)=>fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams({email:f.email.value,source:f.dataset.source||''})});
-  function openFilm(play){const p=$('player'),v=$('filmv');p.classList.add('open');if(play){v.muted=false;v.play().catch(()=>{})}}
 
   // hero form (unchanged behaviour)
   const f=$('waitlist'),m=$('msg'),vForm=$('v-form'),vDone=$('v-done');
@@ -363,18 +387,10 @@ html.port .lonly{display:none}html:not(.port) .ponly{display:none}
   const bf=$('barf');bf.addEventListener('submit',async e=>{e.preventDefault();if(bf.company.value)return;const btn=bf.querySelector('button');btn.disabled=true;
     try{await send(bf);bf.reset();setJoined()}catch(err){btn.textContent='TRY AGAIN'}btn.disabled=false});
 
-  // film form: start the film inside the tap so phones allow sound, then record the email
-  const ff=$('filmf'),fm=$('filmmsg');ff.addEventListener('submit',async e=>{e.preventDefault();if(ff.company.value)return;openFilm(true);const btn=ff.querySelector('button');btn.disabled=true;fm.textContent='';
-    try{await send(ff);ff.reset();fm.textContent="YOU'RE ON THE LIST. ENJOY THE FILM.";setJoined()}catch(err){fm.textContent='Something went wrong. Try again.'}btn.disabled=false});
-  if(isJoined()){$('bar').classList.add('joined');openFilm(false);fm.textContent="YOU'RE ALREADY ON THE LIST. PRESS PLAY."}
-
-  // show the bar only while the explainer is on screen; pause the hero video once it scrolls away
-  const bar=$('bar'),hero=$('top'),film=$('film');
-  function onScroll(){const h=hero.getBoundingClientRect(),fl=film.getBoundingClientRect(),vh=innerHeight;
-    const on=h.bottom<vh*.4&&fl.top>vh*.6;bar.classList.toggle('show',on);bar.setAttribute('aria-hidden',String(!on));
-    bar.querySelectorAll('input,button').forEach(el=>el.tabIndex=on?0:-1);
-    if(h.bottom<0){if(!v.paused)v.pause()}else if(v.paused&&v.dataset.user!=='paused')v.play().catch(()=>{})}
-  addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',onScroll);onScroll();
+  // join slide form
+  const jf=$('joinf'),jm=$('joinmsg');jf.addEventListener('submit',async e=>{e.preventDefault();if(jf.company.value)return;const btn=jf.querySelector('button');btn.disabled=true;jm.textContent='';
+    try{await send(jf);jf.reset();setJoined()}catch(err){jm.textContent='Something went wrong. Try again.'}btn.disabled=false});
+  if(isJoined()){$('bar').classList.add('joined');$('join').classList.add('joined')}
 })();
 </script>
 <script>
@@ -441,7 +457,7 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
     $('s1n').textContent=dots.length;$('s1l').textContent=lines.length;
     setCopy(dots.length===1?0:dots.length===2?1:2)}
   function reset(){dots=[{x:1130,y:450}];lines=[];draw()}
-  svg.addEventListener('pointerdown',e=>{const p=vpt(e,'v1');if(p.x<700||p.y<120||p.y>820||dots.length>=40)return;
+  svg.addEventListener('click',e=>{const p=vpt(e,'v1');if(p.x<700||p.y<120||p.y>820||dots.length>=40)return;
     const near=dots.map((d,i)=>[i,dist(d,p)]).sort((a,b)=>a[1]-b[1]);if(near[0][1]<18)return;
     const k=Math.min(3,dots.length);
     dots.push(p);const j=dots.length-1;near.slice(0,k).forEach(([i])=>lines.push([i,j]));draw()});
@@ -552,7 +568,7 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
       const i=Math.floor(u),f=u-i,a=Q[pk.path[i]],b=Q[pk.path[i+1]];pk.el.setAttribute('opacity',1);
       pk.el.setAttribute('x',a.x+(b.x-a.x)*f-4.5);pk.el.setAttribute('y',a.y+(b.y-a.y)*f-4.5);return true})})}
   function kill(nt,i){if(nt.kind==='m'&&(i===0||i===24))return;nt.alive[i]=false}
-  svg.addEventListener('pointerdown',e=>{const p=pt(e);let best=null,bd=PORT?34:26;nets.forEach(nt=>nt.P.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;best=[nt,i]}}));
+  svg.addEventListener('click',e=>{const p=pt(e);let best=null,bd=PORT?34:26;nets.forEach(nt=>nt.P.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;best=[nt,i]}}));
     if(best){const [nt,i]=best;if(nt.alive[i])kill(nt,i);else nt.alive[i]=true;draw()}});
   $('s3r').onclick=reset;
   $('s3a').onclick=()=>{nets.forEach(nt=>{for(let t=0;t<3;t++){const c=nt.P.map((p,i)=>i).filter(i=>nt.alive[i]&&!(nt.kind==='m'&&(i===0||i===24)));
@@ -588,7 +604,7 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
   function setMode(i){mode=i;$('s4copy').innerHTML=modes[i].copy;$('s4hint').textContent=modes[i].hint;flows=[];fires=[];ripples=[];tiffins=[{t0:performance.now()/1000}]}
   setMode(0);
   c.addEventListener('pointermove',e=>{ptr=vpt(e,'v4')});c.addEventListener('pointerleave',()=>ptr=null);
-  c.addEventListener('pointerdown',e=>{const p=vpt(e,'v4');ptr=p;const now=performance.now()/1000;if(p.x<620)return;const m=modes[mode].id;
+  c.addEventListener('click',e=>{const p=vpt(e,'v4');ptr=p;const now=performance.now()/1000;if(p.x<620)return;const m=modes[mode].id;
     if(m==='forest'){let bi=0,bd=1e9;trees.forEach((t,i)=>{const dd=Math.abs(t.x-p.x);if(dd<bd){bd=dd;bi=i}});flows.push({src:bi,t0:now})}
     if(m==='brain'){let bi=0,bd=1e9;nodes.forEach((q,i)=>{const dd=dist(p,q);if(dd<bd){bd=dd;bi=i}});fires.push({D:depths(bA,bi),t0:now})}
     if(m==='dabba'){if(tiffins.length<6)tiffins.push({t0:now})}
@@ -665,16 +681,47 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
   ticks[4]=t=>{P.forEach((p,i)=>{const c=pulses[i];if(s===2){c.setAttribute('r',0);return}c.setAttribute('r',s===3?6:4.5);c.setAttribute('fill',s===3?Y:W);
     const u=((t*.45)+i*.137)%1,out=(i%2===0);const q=out?u:1-u;c.setAttribute('cx',C.x+(p.x-C.x)*q);c.setAttribute('cy',C.y+(p.y-C.y)*q)})};
 })();
-/* ---------- scrolling: animate only the slides on screen; cycle options on the slide in view ---------- */
+/* ---------- horizontal site: one panel per screen ---------- */
+const track=$('track'),pans=[...track.children],NP=pans.length,dotsEl=$('ndots');let at=-1,lock=0;
+pans.forEach((p,i)=>{const d=document.createElement('i');d.title='Slide '+(i+1);d.onclick=()=>goto(i);dotsEl.appendChild(d)});
+const heroV=$('vid'),filmV=$('filmv');
+function goto(i,instant){i=Math.max(0,Math.min(NP-1,i));if(i===at)return;at=i;
+  track.style.transition=instant?'none':'';track.style.transform=`translateX(${-i*100}vw)`;
+  pans.forEach((p,k)=>{p.classList.toggle('here',k===i);p.inert=k!==i});
+  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+  const t=pans[i].dataset.tone||'black';document.body.dataset.tone=t;
+  document.body.classList.toggle('withbar',pans[i].dataset.bar==='1');
+  {const on=pans[i].dataset.bar==='1',bar=$('bar');bar.setAttribute('aria-hidden',String(!on));bar.querySelectorAll('input,button').forEach(el=>el.tabIndex=on?0:-1)}
+  $('pv').disabled=i===0;$('nx').disabled=i===NP-1;
+  // which deck slide (if any) is on screen now
+  const sl=pans[i].querySelector('.slide');vis.clear();cur=-1;slides.forEach(s=>s.classList.remove('active'));
+  if(sl){const k=slides.indexOf(sl);vis.add(k);cur=k;sl.classList.add('active');cyclers.forEach(c=>{if(c.slideIdx===k)c.start()});requestAnimationFrame(()=>cyclers.forEach(c=>c.place()))}
+  if(i===0){heroV.play().catch(()=>{})}else heroV.pause();
+  if(pans[i].id!=='film'&&!filmV.paused)filmV.pause();
+  try{history.replaceState(null,'',i?'#'+(pans[i].id||'s'+i):location.pathname)}catch(e){}}
 const vis=new Set();
-const io=new IntersectionObserver(es=>{es.forEach(e=>{const i=slides.indexOf(e.target);
-  if(e.isIntersecting){vis.add(i);if(e.intersectionRatio>=.55&&cur!==i){cur=i;e.target.classList.add('active');cyclers.forEach(c=>{if(c.slideIdx===i)c.start()})}}
-  else{vis.delete(i);e.target.classList.remove('active');if(cur===i)cur=-1}})},{threshold:[0,.55]});
-slides.forEach(s=>io.observe(s));
+$('pv').onclick=()=>goto(at-1);$('nx').onclick=()=>goto(at+1);
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();goto(+b.dataset.go)}));
+// keyboard
+addEventListener('keydown',e=>{if(e.target.closest('input,textarea,video'))return;if($('src').classList.contains('open')){if(e.key==='Escape')$('src').classList.remove('open');return}
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();goto(at+1)}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();goto(at-1)}
+  else if(e.key==='Home'){goto(0)}else if(e.key==='End'){goto(NP-1)}});
+// wheel and trackpad: one gesture moves one slide
+let acc=0,accT=0;
+addEventListener('wheel',e=>{if($('src').classList.contains('open'))return;e.preventDefault();const now=performance.now();if(now<lock)return;
+  if(now-accT>220)acc=0;accT=now;acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  if(Math.abs(acc)>40){goto(at+(acc>0?1:-1));acc=0;lock=now+750}},{passive:false});
+// swipe on touch screens
+let sw=null;
+addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('input,video,#src')){sw=null;return}sw={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
+addEventListener('touchend',e=>{if(!sw)return;const dx=e.changedTouches[0].clientX-sw.x,dy=e.changedTouches[0].clientY-sw.y;sw=null;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.2)goto(at+(dx<0?1:-1));else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)*1.5)goto(at+(dy<0?1:-1))},{passive:true});
+addEventListener('resize',()=>{const a=at;at=-1;goto(a,true)});
 $('srcx').onclick=()=>$('src').classList.remove('open');
 document.querySelectorAll('.srcb').forEach(b=>b.onclick=()=>$('src').classList.add('open'));
-addEventListener('keydown',e=>{if(e.key==='Escape')$('src').classList.remove('open')});
-fit();requestAnimationFrame(()=>cyclers.forEach(c=>c.place()));
+fit();
+const start=pans.findIndex(p=>p.id&&'#'+p.id===location.hash);goto(start>0?start:0,true);
 function loop(ms){const t=ms/1000;vis.forEach(i=>ticks[i]&&ticks[i](t));cyclers.forEach(c=>c.tick(performance.now()));requestAnimationFrame(loop)}
 if(RM){Object.values(ticks).forEach(f=>f(0))}else requestAnimationFrame(loop);
 })();
