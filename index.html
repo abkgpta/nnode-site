@@ -36,7 +36,6 @@ body{color:var(--w);font-family:var(--mono);font-weight:500;-webkit-text-size-ad
 .pan{flex:0 0 100vw;width:100vw;height:100%;position:relative;overflow:hidden}
 /* on-screen arrows */
 #nav{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:8px;align-items:center;color:var(--w);transition:bottom .35s ease}
-body.withbar #nav{bottom:calc(var(--bar) + 14px + env(safe-area-inset-bottom))}
 body[data-tone=white] #nav{color:var(--k);--nb:var(--w)}body[data-tone=yellow] #nav{color:var(--k);--nb:var(--y)}
 #nav button{font:500 14px/1 var(--mono);letter-spacing:.1em;background:var(--nb,var(--k));border:1.5px solid currentColor;color:inherit;width:44px;height:44px;cursor:pointer;display:grid;place-items:center}
 #nav button:disabled{opacity:.3;cursor:default}
@@ -74,8 +73,7 @@ body[data-tone=white] #nav{color:var(--k);--nb:var(--w)}body[data-tone=yellow] #
 @media (max-width:600px){.hero .panel{padding:24px 20px;gap:20px}.hero .sound{right:16px;top:16px}.hero .down{left:16px;bottom:20px}}
 
 /* ---------- explainer: one scaled stage per screen ---------- */
-.slot{padding:8px 8px calc(var(--bar) + 72px)}
-@media (min-width:900px){.slot{padding-bottom:calc(var(--bar) + 8px)}}
+.slot{padding:8px 8px 72px}
 .slot.t-black{background:var(--k)}.slot.t-white{background:var(--w)}.slot.t-yellow{background:var(--y)}
 .frame{position:relative;width:100%;height:100%;overflow:hidden}
 .stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,.5));overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -125,19 +123,13 @@ html.port .sn{font-size:48px}html.port .box{font-size:24px}html.port .chrome{fon
 html.port .chrome .tl{left:44px;top:34px}html.port .chrome .tr{right:44px;top:34px}html.port .chrome .bl{display:none}
 html.port .lonly{display:none}html:not(.port) .ponly{display:none}
 
-/* ---------- email bar that follows the explainer ---------- */
-#bar{position:fixed;transform:translateY(110%);left:0;right:0;bottom:0;z-index:50;min-height:var(--bar);background:var(--k);color:var(--w);border-top:2px solid var(--y);
-  display:flex;align-items:center;justify-content:center;gap:16px;padding:8px max(16px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
-  transform:translateY(110%);transition:transform .35s ease}
+/* ---------- waitlist button that follows the explainer ---------- */
+#bar{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:50;transform:translateY(160%);transition:transform .35s ease}
 body.withbar #bar{transform:none}
-#bar .lab{font-size:13px;letter-spacing:.1em;white-space:nowrap}
-#bar .lab span{color:var(--y)}
-#bar .wl{max-width:460px;border-color:var(--y)}
-#bar .wl button{background:var(--y);color:var(--k)}
-#bar .done{display:none;font-size:13px;letter-spacing:.1em}
-#bar.joined .wl,#bar.joined .lab{display:none}#bar.joined .done{display:block}
-@media (max-width:720px){#bar .lab{display:none}#bar .wl{max-width:none}}
-
+body[data-tone=yellow] #bar button{background:var(--k);color:var(--y)}
+#bar button{font:500 14px/1 var(--mono);letter-spacing:.08em;background:var(--y);color:var(--k);border:1.5px solid var(--k);height:44px;padding:0 16px;cursor:pointer;display:flex;gap:10px;align-items:center;white-space:nowrap}
+#bar button b{display:inline-block;animation:nudge 1.4s ease-in-out infinite;transform-origin:center}
+@media (hover:hover){#bar button:hover{background:var(--k);color:var(--y);border-color:var(--y)}}
 /* ---------- ending: join slide, then film slide ---------- */
 .end{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(56px,9vh,110px) 24px calc(96px + env(safe-area-inset-bottom))}
 .end .in{width:min(960px,100%)}
@@ -354,13 +346,7 @@ body.withbar #bar{transform:none}
 
 <!-- email bar shown while reading the explainer -->
 <div id="bar" aria-hidden="true">
-  <div class="lab">/GET STICK FIRST/ <span>JOIN THE WAITLIST</span></div>
-  <form class="wl" id="barf" data-source="explainer">
-    <p class="hp"><label>Leave empty <input name="company" tabindex="-1"></label></p>
-    <input type="email" name="email" placeholder="YOUR EMAIL" required aria-label="Email address" tabindex="-1">
-    <button type="submit" tabindex="-1">JOIN</button>
-  </form>
-  <div class="done">YOU'RE ON THE LIST. <span style="color:var(--y)">/STICK THROUGH IT ALL/</span></div>
+  <button type="button" id="joinb" tabindex="-1">JOIN THE WAITLIST <b>↑</b></button>
 </div>
 
 <div id="src"><div class="k" style="opacity:.7">/SOURCES/</div><div style="font-size:40px;font-weight:500">WHERE THE STORY COMES FROM.</div>
@@ -375,7 +361,7 @@ body.withbar #bar{transform:none}
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhTaXVS1MVEQcTLNeYxokAJucj6C6iQenMjRiwTEqehgd6xSvN9SyTxvfObrK7fO5g/exec';
   const $=id=>document.getElementById(id);
   const isJoined=()=>{try{return localStorage.getItem('nnode_joined')==='1'}catch(e){return false}};
-  const setJoined=()=>{try{localStorage.setItem('nnode_joined','1')}catch(e){}$('bar').classList.add('joined');$('join').classList.add('joined')};
+  const setJoined=()=>{try{localStorage.setItem('nnode_joined','1')}catch(e){}$('join').classList.add('joined')};
   const send=(f)=>fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams({email:f.email.value,source:f.dataset.source||''})});
 
   // hero form (unchanged behaviour)
@@ -387,14 +373,10 @@ body.withbar #bar{transform:none}
   const v=$('vid'),b=$('snd');
   b.addEventListener('click',()=>{v.muted=!v.muted;if(!v.muted)v.play().catch(()=>{});b.textContent=v.muted?'Sound off':'Sound on';b.setAttribute('aria-pressed',String(!v.muted))});
 
-  // bar form
-  const bf=$('barf');bf.addEventListener('submit',async e=>{e.preventDefault();if(bf.company.value)return;const btn=bf.querySelector('button');btn.disabled=true;
-    try{await send(bf);bf.reset();setJoined()}catch(err){btn.textContent='TRY AGAIN'}btn.disabled=false});
-
   // join slide form
   const jf=$('joinf'),jm=$('joinmsg');jf.addEventListener('submit',async e=>{e.preventDefault();if(jf.company.value)return;const btn=jf.querySelector('button');btn.disabled=true;jm.textContent='';
     try{await send(jf);jf.reset();setJoined()}catch(err){jm.textContent='Something went wrong. Try again.'}btn.disabled=false});
-  if(isJoined()){$('bar').classList.add('joined');$('join').classList.add('joined')}
+  if(isJoined()){$('join').classList.add('joined')}
 })();
 </script>
 <script>
@@ -704,7 +686,8 @@ function goto(i,instant){i=Math.max(0,Math.min(NP-1,i));if(i===at)return;at=i;
   if(pans[i].id!=='film'&&!filmV.paused)filmV.pause();
   try{history.replaceState(null,'',i?'#'+(pans[i].id||'s'+i):location.pathname)}catch(e){}}
 const vis=new Set();
-$('pv').onclick=()=>goto(at-1);$('nx').onclick=()=>goto(at+1);
+$('pv').onclick=()=>goto(at-1);
+$('joinb').onclick=()=>{goto(0);setTimeout(()=>{const v=document.querySelector('#v-form:not(.hidden) input[type=email]');if(v&&matchMedia('(hover:hover)').matches)v.focus({preventScroll:true})},800)};$('nx').onclick=()=>goto(at+1);
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();goto(+b.dataset.go)}));
 // keyboard
 addEventListener('keydown',e=>{if(e.target.closest('input,textarea,video'))return;if($('src').classList.contains('open')){if(e.key==='Escape')$('src').classList.remove('open');return}
