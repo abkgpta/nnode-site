@@ -30,6 +30,7 @@
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--k)}
 body{color:var(--w);font-family:var(--mono);font-weight:500;-webkit-text-size-adjust:100%}
+#world.fast,#track.fast{transition-duration:.4s!important}
 #world{height:100vh;height:100svh;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
 #world>.hero{height:100%}
 #track{display:flex;height:100%;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
@@ -691,11 +692,15 @@ addEventListener('keydown',e=>{if(e.target.closest('input,textarea,video'))retur
   if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();goto(at+1)}
   else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();goto(at-1)}
   else if(e.key==='Home'){goto(0)}else if(e.key==='End'){goto(NP-1)}});
-// wheel and trackpad: one gesture moves one slide
-let acc=0,accT=0;
-addEventListener('wheel',e=>{if($('src').classList.contains('open'))return;e.preventDefault();const now=performance.now();if(now<lock)return;
-  if(now-accT>220)acc=0;accT=now;acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-  if(Math.abs(acc)>40){goto(at+(acc>0?1:-1));acc=0;lock=now+750}},{passive:false});
+// wheel and trackpad: a gentle gesture moves one slide; a hard, fast scroll keeps going
+let acc=0,lastW=0,lastStep=0,inG=false;
+addEventListener('wheel',e=>{if($('src').classList.contains('open'))return;e.preventDefault();const now=performance.now();
+  const d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?40:e.deltaMode===2?800:1);
+  if(now-lastW>200){inG=false;acc=0}lastW=now;
+  if(acc&&Math.sign(d)!==Math.sign(acc))acc=0;acc+=d;
+  if(!inG){if(Math.abs(acc)>40){inG=true;step(acc>0?1:-1,now)}}
+  else if(Math.abs(acc)>700&&now-lastStep>230){step(acc>0?1:-1,now,true)}},{passive:false});
+function step(dir,now,fast){acc=0;lastStep=now;track.classList.toggle('fast',!!fast);world.classList.toggle('fast',!!fast);goto(at+dir)}
 // swipe on touch screens
 let sw=null;
 addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('input,video,#src')){sw=null;return}sw={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
