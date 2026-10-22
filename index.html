@@ -142,12 +142,14 @@ body[data-tone=yellow] #bar button{background:var(--k);color:var(--y)}
 .join .ok{display:none;margin-top:28px;font-size:clamp(18px,2.4vw,26px)}
 .join .ok span{background:var(--k);color:var(--y);padding:4px 10px}
 .join.joined .wl{display:none}.join.joined .ok{display:block}
-.watch{background:var(--k);color:var(--w)}
-.watch .in{width:min(1100px,100%)}
-.player{position:relative;margin-top:22px;width:100%;max-height:62svh;aspect-ratio:16/9;background:#000;border:2px solid var(--y)}
-.player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:block}
+.join .player{position:relative;width:min(100%,calc(42svh * 16 / 9));aspect-ratio:16/9;background:#000;border:2px solid var(--k);margin-bottom:clamp(20px,4vh,40px)}
+.player video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.fsnd{position:absolute;right:10px;bottom:10px;font:500 12px/1 var(--mono);letter-spacing:.08em;background:var(--y);color:var(--k);border:1.5px solid var(--k);padding:9px 12px;cursor:pointer}
+.join h2{font-size:clamp(28px,min(5.4vw,6.5vh),64px)}
+@media (max-height:700px){.join .player{width:min(100%,calc(28svh * 16 / 9))}.end{padding-top:20px}.join .wl{margin-top:18px}}
 .end .foot{position:absolute;left:24px;right:24px;bottom:calc(24px + env(safe-area-inset-bottom));width:auto;margin:0;padding:0;padding-right:300px}
 @media (max-width:600px){.end .foot{padding-right:0;bottom:calc(76px + env(safe-area-inset-bottom))}.end{padding-bottom:150px}}
+@media (max-width:600px) and (max-height:700px){.end .foot{display:none}.end{padding-bottom:76px}}
 .foot{width:min(960px,100%);margin-top:auto;padding-top:48px;display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:space-between;font-size:12px;letter-spacing:.12em}
 .foot button{font:inherit;letter-spacing:inherit;background:none;border:0;border-bottom:1.5px solid currentColor;color:inherit;padding:0 0 2px;cursor:pointer}
 
@@ -313,9 +315,12 @@ body[data-tone=yellow] #bar button{background:var(--k);color:var(--y)}
 </div></div></div>
 
 
-<!-- JOIN -->
+</div>
+
+<!-- END: the film, then the waitlist -->
 <section class="pan end join" id="join" data-tone="yellow" aria-label="Join the waitlist">
   <div class="in">
+    <div class="player"><video id="filmv" src="brand.mp4" poster="brand_poster.jpg" muted loop playsinline preload="none" aria-label="nNode brand film"></video><button type="button" class="fsnd" id="fsnd" aria-pressed="false">SOUND OFF</button></div>
     <div class="k">/06/ JOIN THE MESH/</div>
     <h2>YOU ARE A NODE.<br>PLUG INTO THE MESH.</h2>
     <p>GET ON THE STICK WAITLIST. WE'LL TELL YOU THE MOMENT THE FIRST DROP GOES LIVE.</p>
@@ -329,17 +334,6 @@ body[data-tone=yellow] #bar button{background:var(--k);color:var(--y)}
   </div>
   <div class="foot"><span>/STICK THROUGH IT ALL/</span><button type="button" class="srcb">SOURCES</button><span>nNode. 2026.</span></div>
 </section>
-
-<!-- FILM -->
-<section class="pan end watch" id="film" data-tone="black" aria-label="The film">
-  <div class="in">
-    <div class="k">/07/ THE FILM/</div>
-    <h2>WELCOME TO THE MESH.</h2>
-    <div class="player"><video id="filmv" src="brand.mp4" poster="brand_poster.jpg" controls playsinline preload="none"></video></div>
-  </div>
-  <div class="foot"><span>/STICK THROUGH IT ALL/</span><button type="button" class="srcb">SOURCES</button><span>nNode. 2026.</span></div>
-</section>
-</div>
 </div>
 
 <nav id="nav" aria-label="Slides"><button id="pv" type="button" aria-label="Previous slide">←</button><span id="ndots"></span><button id="nx" type="button" aria-label="Next slide">→</button></nav>
@@ -408,6 +402,8 @@ function pt(e){const r=e.target.closest('.stage').getBoundingClientRect();return
 function vpt(e,id){const p=pt(e);if(!PORT)return p;const v=VIS[id].V,k=visK(id);return{x:(p.x-44)/k+v[0],y:(p.y-VIS[id].top)/k+v[1]}}
 function comps(n,E,alive){const A=Array.from({length:n},()=>[]);E.forEach(([a,b])=>{if(alive[a]&&alive[b]){A[a].push(b);A[b].push(a)}});return A}
 function bfs(A,a,b){const prev=new Array(A.length).fill(-1),seen=new Array(A.length).fill(false),q=[a];seen[a]=true;while(q.length){const u=q.shift();if(u===b)break;for(const v of A[u])if(!seen[v]){seen[v]=true;prev[v]=u;q.push(v)}}if(!seen[b])return null;const p=[];for(let v=b;v!==-1;v=prev[v])p.unshift(v);return p}
+// share of the surviving nodes' pairs that can still reach each other
+function talking(A,alive){const n=A.length,seen=new Array(n).fill(false);let pairs=0;const m=alive.filter(Boolean).length;if(m<2)return 0;for(let i=0;i<n;i++){if(!alive[i]||seen[i])continue;let c=0;const q=[i];seen[i]=true;while(q.length){const u=q.pop();c++;for(const v of A[u])if(!seen[v]){seen[v]=true;q.push(v)}}pairs+=c*(c-1)/2}return pairs/(m*(m-1)/2)}
 function largest(A,alive){const seen=new Array(A.length).fill(false);let best=0;for(let i=0;i<A.length;i++){if(!alive[i]||seen[i])continue;let c=0;const q=[i];seen[i]=true;while(q.length){const u=q.pop();c++;for(const v of A[u])if(!seen[v]){seen[v]=true;q.push(v)}}best=Math.max(best,c)}return best}
 
 const slides=[...document.querySelectorAll('.slide')],N=slides.length;let cur=-1;const ticks={};
@@ -519,7 +515,7 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
       nets=[mk('c',330,495,1),mk('d',800,495,1),mk('m',1270,495,1)]}
     draw()}
   function draw(){svg.innerHTML='';const fs=PORT?16:13;
-    nets.forEach((nt,k)=>{const g=S('g',{},svg);const A=comps(nt.P.length,nt.E,nt.alive);nt.A=A;const big=largest(A,nt.alive),pct=Math.round(big/nt.P.length*100);
+    nets.forEach((nt,k)=>{const g=S('g',{},svg);const A=comps(nt.P.length,nt.E,nt.alive);nt.A=A;const pct=Math.round(talking(A,nt.alive)*100);
       nt.route=nt.kind==='m'?bfs(A,0,24):null;const route=nt.route;
       const onRoute=new Set();if(route)for(let i=0;i<route.length-1;i++)onRoute.add(Math.min(route[i],route[i+1])+'-'+Math.max(route[i],route[i+1]));
       nt.lines=nt.E.map(([a,b])=>{const ok=nt.alive[a]&&nt.alive[b];const r=onRoute.has(Math.min(a,b)+'-'+Math.max(a,b));
@@ -668,11 +664,11 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
     const u=((t*.45)+i*.137)%1,out=(i%2===0);const q=out?u:1-u;c.setAttribute('cx',C.x+(p.x-C.x)*q);c.setAttribute('cy',C.y+(p.y-C.y)*q)})};
 })();
 /* ---------- horizontal site: one panel per screen ---------- */
-const world=$('world'),track=$('track'),pans=[$('top'),...track.children],NP=pans.length,dotsEl=$('ndots');let at=-1,lock=0;
+const world=$('world'),track=$('track'),pans=[$('top'),...track.children,$('join')],NSL=track.children.length,NP=pans.length,dotsEl=$('ndots');let at=-1,lock=0;
 pans.forEach((p,i)=>{const d=document.createElement('i');d.title='Slide '+(i+1);d.onclick=()=>goto(i);dotsEl.appendChild(d)});
 const heroV=$('vid'),filmV=$('filmv');
 function goto(i,instant){i=Math.max(0,Math.min(NP-1,i));if(i===at)return;at=i;
-  track.style.transition=world.style.transition=instant?'none':'';world.style.transform=i?'translateY(-100%)':'none';track.style.transform=`translateX(${-Math.max(0,i-1)*100}vw)`;
+  track.style.transition=world.style.transition=instant?'none':'';world.style.transform=i?`translateY(${i>NSL?-200:-100}%)`:'none';track.style.transform=`translateX(${-Math.max(0,Math.min(NSL,i)-1)*100}vw)`;
   pans.forEach((p,k)=>{p.classList.toggle('here',k===i);p.inert=k!==i});
   [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===i));
   const t=pans[i].dataset.tone||'black';document.body.dataset.tone=t;
@@ -683,10 +679,11 @@ function goto(i,instant){i=Math.max(0,Math.min(NP-1,i));if(i===at)return;at=i;
   const sl=pans[i].querySelector('.slide');vis.clear();cur=-1;slides.forEach(s=>s.classList.remove('active'));
   if(sl){const k=slides.indexOf(sl);vis.add(k);cur=k;sl.classList.add('active');cyclers.forEach(c=>{if(c.slideIdx===k)c.start()});requestAnimationFrame(()=>cyclers.forEach(c=>c.place()))}
   if(i===0){heroV.play().catch(()=>{})}else heroV.pause();
-  if(pans[i].id!=='film'&&!filmV.paused)filmV.pause();
+  if(pans[i].id==='join'){filmV.preload='auto';filmV.play().catch(()=>{})}else if(!filmV.paused)filmV.pause();
   try{history.replaceState(null,'',i?'#'+(pans[i].id||'s'+i):location.pathname)}catch(e){}}
 const vis=new Set();
 $('pv').onclick=()=>goto(at-1);
+$('fsnd').onclick=()=>{filmV.muted=!filmV.muted;if(!filmV.muted)filmV.play().catch(()=>{});$('fsnd').textContent=filmV.muted?'SOUND OFF':'SOUND ON';$('fsnd').setAttribute('aria-pressed',String(!filmV.muted))};
 $('joinb').onclick=()=>{goto(0);setTimeout(()=>{const v=document.querySelector('#v-form:not(.hidden) input[type=email]');if(v&&matchMedia('(hover:hover)').matches)v.focus({preventScroll:true})},800)};$('nx').onclick=()=>goto(at+1);
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();goto(+b.dataset.go)}));
 // keyboard
