@@ -30,8 +30,10 @@
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--k)}
 body{color:var(--w);font-family:var(--mono);font-weight:500;-webkit-text-size-adjust:100%}
-#track{display:flex;height:100vh;height:100svh;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
-.pan{flex:0 0 100vw;width:100vw;height:100vh;height:100svh;position:relative;overflow:hidden}
+#world{height:100vh;height:100svh;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
+#world>.hero{height:100%}
+#track{display:flex;height:100%;transition:transform .75s cubic-bezier(.7,0,.2,1);will-change:transform}
+.pan{flex:0 0 100vw;width:100vw;height:100%;position:relative;overflow:hidden}
 /* on-screen arrows */
 #nav{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:8px;align-items:center;color:var(--w);transition:bottom .35s ease}
 body.withbar #nav{bottom:calc(var(--bar) + 14px + env(safe-area-inset-bottom))}
@@ -67,7 +69,7 @@ body[data-tone=white] #nav{color:var(--k);--nb:var(--w)}body[data-tone=yellow] #
 .hero .sound{position:absolute;right:20px;top:20px;background:var(--yellow);color:var(--black);border:2px solid var(--black);font:inherit;font-size:13px;padding:10px 14px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase}
 .hero .sound:hover{background:var(--white)}
 .hero .down{position:absolute;left:20px;bottom:20px;background:var(--black);color:var(--yellow);border:2px solid var(--yellow);font-size:13px;letter-spacing:.08em;padding:10px 14px;text-decoration:none;text-transform:none;white-space:nowrap;display:flex;gap:10px;align-items:center}
-.hero .down b{display:inline-block;animation:nudgex 1.4s ease-in-out infinite}
+.hero .down b{display:inline-block;animation:nudge 1.4s ease-in-out infinite}
 @keyframes nudgex{50%{transform:translateX(4px)}}
 @media (max-width:600px){.hero .panel{padding:24px 20px;gap:20px}.hero .sound{right:16px;top:16px}.hero .down{left:16px;bottom:20px}}
 
@@ -168,7 +170,7 @@ body.withbar #bar{transform:none}
 <body>
 
 <!-- HERO: video + waitlist -->
-<div id="track">
+<div id="world">
 <header class="pan hero" id="top" data-tone="yellow">
 <video class="video" id="vid" src="brand.mp4" poster="brand_poster.jpg" autoplay muted loop playsinline preload="auto" aria-label="nNode brand film"></video>
 <div class="overlay">
@@ -226,9 +228,10 @@ body.withbar #bar{transform:none}
     <span class="tag">/STICK THROUGH IT ALL/</span>
   </div>
 </div>
-<a class="down" href="#n1" data-go="1">WHAT IS nNode? <b>→</b></a>
+<a class="down" href="#n1" data-go="1">WHAT IS nNode? <b>↓</b></a>
 <button class="sound" id="snd" type="button" aria-pressed="false">Sound off</button>
 </header>
+<div id="track">
 
 <!-- WHAT IS nNode: the five interactive slides -->
 <div class="pan slot t-white" id="n1" data-tone="white" data-bar="1" aria-label="/01/ THE KNOT/"><div class="frame"><div class="stage">
@@ -344,6 +347,7 @@ body.withbar #bar{transform:none}
   </div>
   <div class="foot"><span>/STICK THROUGH IT ALL/</span><button type="button" class="srcb">SOURCES</button><span>nNode. 2026.</span></div>
 </section>
+</div>
 </div>
 
 <nav id="nav" aria-label="Slides"><button id="pv" type="button" aria-label="Previous slide">←</button><span id="ndots"></span><button id="nx" type="button" aria-label="Next slide">→</button></nav>
@@ -682,11 +686,11 @@ if(document.fonts)document.fonts.ready.then(()=>cyclers.forEach(c=>c.place()));
     const u=((t*.45)+i*.137)%1,out=(i%2===0);const q=out?u:1-u;c.setAttribute('cx',C.x+(p.x-C.x)*q);c.setAttribute('cy',C.y+(p.y-C.y)*q)})};
 })();
 /* ---------- horizontal site: one panel per screen ---------- */
-const track=$('track'),pans=[...track.children],NP=pans.length,dotsEl=$('ndots');let at=-1,lock=0;
+const world=$('world'),track=$('track'),pans=[$('top'),...track.children],NP=pans.length,dotsEl=$('ndots');let at=-1,lock=0;
 pans.forEach((p,i)=>{const d=document.createElement('i');d.title='Slide '+(i+1);d.onclick=()=>goto(i);dotsEl.appendChild(d)});
 const heroV=$('vid'),filmV=$('filmv');
 function goto(i,instant){i=Math.max(0,Math.min(NP-1,i));if(i===at)return;at=i;
-  track.style.transition=instant?'none':'';track.style.transform=`translateX(${-i*100}vw)`;
+  track.style.transition=world.style.transition=instant?'none':'';world.style.transform=i?'translateY(-100%)':'none';track.style.transform=`translateX(${-Math.max(0,i-1)*100}vw)`;
   pans.forEach((p,k)=>{p.classList.toggle('here',k===i);p.inert=k!==i});
   [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===i));
   const t=pans[i].dataset.tone||'black';document.body.dataset.tone=t;
